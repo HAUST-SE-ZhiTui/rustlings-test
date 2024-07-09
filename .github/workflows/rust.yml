@@ -23,6 +23,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'true' # 初始化和更新子模块
     - name: Run tests
       run: cargo test --test cicv --verbose --manifest-path rustlings/Cargo.toml
     - uses: yfblock/os-autograding@master
@@ -42,7 +44,7 @@ jobs:
         # 生成新的 JSON 内容
         new_json=$(jq -n \
           --arg channel "github" \
-          --argjson courseId 1558 \
+          --argjson courseId 1698 \
           --arg ext "aaa" \
           --arg name "$github_user" \
           --argjson score "$total_succeeds" \
