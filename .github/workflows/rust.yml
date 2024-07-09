@@ -25,7 +25,9 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: 'true' # 初始化和更新子模块
-    - name: Run tests
+    - name: Copy tests directory to rustlings
+      run: cp -r tests rustlings/
+    - name: Run tests for rustlings
       run: cargo test --test cicv --verbose --manifest-path rustlings/Cargo.toml
     - uses: yfblock/os-autograding@master
       id: autograding
@@ -44,7 +46,7 @@ jobs:
         # 生成新的 JSON 内容
         new_json=$(jq -n \
           --arg channel "github" \
-          --argjson courseId 1698 \
+          --argjson courseId 1558 \
           --arg ext "aaa" \
           --arg name "$github_user" \
           --argjson score "$total_succeeds" \
