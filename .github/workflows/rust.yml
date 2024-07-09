@@ -38,7 +38,7 @@ jobs:
     - name: Copy tests directory to rustlings
       run: cp -r tests rustlings/
     - name: Run tests for rustlings
-      run: cargo test --test cicv --verbose --manifest-path rustlings/Cargo.toml
+      run: cargo test --verbose --manifest-path rustlings/Cargo.toml
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
