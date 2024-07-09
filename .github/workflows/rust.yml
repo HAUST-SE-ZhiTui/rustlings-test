@@ -36,10 +36,10 @@ jobs:
       run: |
         cargo install --force rustlings
         rustlings --version
-    - name: Copy tests directory to rustlings
-      run: cp -r tests rustlings/
+    - name: Copy rustlings directory to project root
+      run: cp -r rustlings/* .
     - name: Run tests for rustlings
-      run: cargo test --verbose --manifest-path rustlings/Cargo.toml
+      run: cargo test --verbose
       continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
