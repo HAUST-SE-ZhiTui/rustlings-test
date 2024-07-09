@@ -1,0 +1,39 @@
+name: Rustlings Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true  # Checkout submodules recursively
+
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Install Rustlings
+      run: |
+        cargo install --force rustlings
+
+    - name: Change directory to rustlings
+      run: |
+        cd rustlings
+
+    - name: Run Rustlings tests
+      run: |
+        rustlings run
+      working-directory: ./rustlings
