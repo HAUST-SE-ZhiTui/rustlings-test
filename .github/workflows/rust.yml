@@ -73,7 +73,7 @@ jobs:
 
     - name: Post summary JSON to remote API
       run: |
-        summary_file="rustlings/.github/result/summary.json"
+        summary_file=".github/result/summary.json"
 
         # 发送 POST 请求
         curl -X POST "https://api.learningcamp.cn/web/api/courseRank/createByThird" \
