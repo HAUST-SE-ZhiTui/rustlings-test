@@ -35,5 +35,5 @@ jobs:
 
     - name: Run Rustlings tests
       run: |
-        rustlings run
+        rustlings
       working-directory: ./rustlings
