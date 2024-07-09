@@ -47,8 +47,8 @@ jobs:
         outputFile: .github/result/check_result.json
     - name: Generate summary JSON
       run: |
-        outfile="rustlings/.github/result/outfile"
-        summary_file="rustlings/.github/result/summary.json"
+        outfile=".github/result/check_result.json"
+        summary_file=".github/result/summary.json"
 
         # 提取需要的值
         total_exercations=$(jq '.statistics.total_exercations' $outfile)
@@ -58,7 +58,7 @@ jobs:
         # 生成新的 JSON 内容
         new_json=$(jq -n \
           --arg channel "github" \
-          --argjson courseId 1558 \
+          --argjson courseId 1698 \
           --arg ext "aaa" \
           --arg name "$github_user" \
           --argjson score "$total_succeeds" \
