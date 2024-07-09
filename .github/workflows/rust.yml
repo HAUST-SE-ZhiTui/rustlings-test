@@ -29,7 +29,9 @@ jobs:
       id: autograding
       with:
         outputFile: .github/result/check_result.json
-      working-directory: rustlings
+      run: |
+        cd rustlings
+        yfblock/os-autograding@master
     - name: Generate summary JSON
       run: |
         outfile="rustlings/.github/result/outfile"
