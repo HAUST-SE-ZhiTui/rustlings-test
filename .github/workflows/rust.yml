@@ -25,14 +25,11 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: 'true' # 初始化和更新子模块
-    - name: Copy tests directory to rustlings
-      run: cp -r tests rustlings/
-    - name: Run tests for rustlings
-      run: cargo test --test cicv --verbose --manifest-path rustlings/Cargo.toml
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
-        outputFile: rustlings/.github/result/check_result.json
+        outputFile: .github/result/check_result.json
+      working-directory: rustlings
     - name: Generate summary JSON
       run: |
         outfile="rustlings/.github/result/outfile"
