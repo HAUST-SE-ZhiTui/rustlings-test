@@ -27,7 +27,7 @@ jobs:
       with:
         submodules: 'true' # 初始化和更新子模块
     - name: Copy rustlings directory to project root
-      run: cp -r rustlings/* .
+      run: cp -r rustlings/exercises/* .
     - name: Run tests for rustlings
       run: cargo test --test cicv --verbose
       continue-on-error: true
