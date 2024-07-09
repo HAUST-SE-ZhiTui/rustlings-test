@@ -26,11 +26,10 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: 'true' # 初始化和更新子模块
-    - name: Copy rustlings directory to project root
-      run: cp -r rustlings/exercises/* .
+    - name: Copy exercises directory to project root
+      run: cp -r rustlings/exercises .
     - name: Run tests for rustlings
       run: cargo test --test cicv --verbose
-      continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
