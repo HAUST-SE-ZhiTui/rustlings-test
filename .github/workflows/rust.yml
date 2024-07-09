@@ -12,6 +12,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   TZ: Asia/Shanghai # 设置时区
+  RUSTFLAGS: -Awarnings
 
 jobs:
   build:
@@ -39,6 +40,7 @@ jobs:
       run: cp -r tests rustlings/
     - name: Run tests for rustlings
       run: cargo test --verbose --manifest-path rustlings/Cargo.toml
+      continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
