@@ -58,7 +58,7 @@ pub fn parse_target_dir() -> Result<PathBuf> {
         .context("Failed to read the field `target_directory` from the `cargo metadata` output")
         .map(|metadata| metadata.target_directory)
 }
-
+#[derive(Clone)]
 pub struct AppState {
     current_exercise_ind: usize,
     exercises: Vec<Exercise>,

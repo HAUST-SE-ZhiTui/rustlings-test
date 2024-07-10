@@ -1,4 +1,4 @@
-use crate::{exercise::Exercise, run::run, app_state::AppState};
+use crate::{run::run, app_state::AppState};
 use anyhow::{Context, Result};
 use std::time::Instant;
 use tokio::task;

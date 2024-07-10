@@ -47,6 +47,7 @@ fn run_bin(bin_name: &str, output: &mut Vec<u8>, target_dir: &Path) -> Result<bo
 }
 
 /// See `info_file::ExerciseInfo`
+#[derive(Clone)]
 pub struct Exercise {
     pub dir: Option<&'static str>,
     pub name: &'static str,
