@@ -31,14 +31,15 @@ pub async fn cicv_verify(app_state: &mut AppState) -> Result<()> {
     // 并行验证所有练习
     let exercises = app_state.exercises().to_vec();
     let mut handles = vec![];
-    for exercise in exercises {
+    for exercise in &exercises {
+        let exercise_name = exercise.name.clone();
         let mut app_state = app_state.clone();
         let handle = task::spawn(async move {
             let start = Instant::now();
-            app_state.set_current_exercise_by_name(&exercise.name).unwrap();
-            let result = run(&mut app_state).context(format!("Failed to run {}", exercise.name));
+            app_state.set_current_exercise_by_name(&exercise_name).unwrap();
+            let result = run(&mut app_state).context(format!("Failed to run {}", exercise_name));
             let duration = start.elapsed();
-            (exercise.name.clone(), result, duration)
+            (exercise_name, result, duration)
         });
         handles.push(handle);
     }
