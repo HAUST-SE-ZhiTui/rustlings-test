@@ -111,8 +111,13 @@ fn main() -> Result<()> {
             }
 
             let exercises = info_file.exercises;
+            let mut app_state = AppState::new(
+                exercises,
+                info_file.final_message.unwrap_or_default(),
+            )?;
+
             let rt = Runtime::new().context("Failed to create Tokio runtime")?;
-            rt.block_on(cicv_verify::cicv_verify(&exercises))?;
+            rt.block_on(cicv_verify::cicv_verify(&mut app_state))?;
         }
         _ => (),
     }

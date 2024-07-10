@@ -1,17 +1,18 @@
-use crate::exercise::Exercise;
-use crate::run::run;
+use crate::{exercise::Exercise, run::run, app_state::AppState};
 use anyhow::{Context, Result};
 use std::time::Instant;
 use tokio::task;
 
-pub async fn cicv_verify(exercises: &[Exercise]) -> Result<()> {
+pub async fn cicv_verify(app_state: &mut AppState) -> Result<()> {
     // 并行验证所有练习
+    let exercises = app_state.exercises().to_vec();
     let mut handles = vec![];
     for exercise in exercises {
-        let exercise = exercise.clone();
+        let mut app_state = app_state.clone();
         let handle = task::spawn(async move {
             let start = Instant::now();
-            let result = run(&exercise, true).context(format!("Failed to run {}", exercise.name));
+            app_state.set_current_exercise_by_name(&exercise.name).unwrap();
+            let result = run(&mut app_state).context(format!("Failed to run {}", exercise.name));
             let duration = start.elapsed();
             (exercise.name, result, duration)
         });
