@@ -6,7 +6,7 @@ fn cicvverify() {
     Command::cargo_bin("rustlings")
         .unwrap()
         .args(&["cicv-verify"]) 
-        .current_dir("exercises")
+        //.current_dir("exercises")
         .assert()
         .success();
 }
