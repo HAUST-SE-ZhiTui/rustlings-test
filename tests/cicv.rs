@@ -5,7 +5,7 @@ use std::process::Command;
 fn cicvverify() {
     Command::cargo_bin("rustlings")
         .unwrap()
-        .args(&["--nocapture", "cicvverify"]) 
+        .args(&["cicvverify"]) 
         .current_dir("exercises")
         .assert()
         .success();
