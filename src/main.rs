@@ -6,12 +6,14 @@ use std::{
     path::Path,
     process::exit,
 };
+use tokio::runtime::Runtime;
 
 use self::{app_state::AppState, dev::DevCommands, info_file::InfoFile, watch::WatchExit};
 
 mod app_state;
 mod cargo_toml;
 mod cmd;
+mod cicv_verify;
 mod dev;
 mod embedded;
 mod exercise;
@@ -36,7 +38,6 @@ const DEBUG_PROFILE: bool = {
     debug_profile
 };
 
-// The current directory is the official Rustligns repository.
 fn in_official_repo() -> bool {
     Path::new("dev/rustlings-repo.txt").exists()
 }
@@ -50,40 +51,30 @@ fn press_enter_prompt() -> io::Result<()> {
     Ok(())
 }
 
-/// Rustlings is a collection of small exercises to get you used to writing and reading Rust code
 #[derive(Parser)]
 #[command(version)]
 struct Args {
     #[command(subcommand)]
     command: Option<Subcommands>,
-    /// Manually run the current exercise using `r` in the watch mode.
-    /// Only use this if Rustlings fails to detect exercise file changes.
     #[arg(long)]
     manual_run: bool,
 }
 
 #[derive(Subcommand)]
 enum Subcommands {
-    /// Initialize the official Rustlings exercises
     Init,
-    /// Run a single exercise. Runs the next pending exercise if the exercise name is not specified
     Run {
-        /// The name of the exercise
         name: Option<String>,
     },
-    /// Reset a single exercise
     Reset {
-        /// The name of the exercise
         name: String,
     },
-    /// Show a hint. Shows the hint of the next pending exercise if the exercise name is not specified
     Hint {
-        /// The name of the exercise
         name: Option<String>,
     },
-    /// Commands for developing (third-party) Rustlings exercises
     #[command(subcommand)]
     Dev(DevCommands),
+    CicvVerify,
 }
 
 fn main() -> Result<()> {
@@ -99,17 +90,30 @@ fn main() -> Result<()> {
                 bail!("Disabled in the debug build");
             }
 
-            {
-                let mut stdout = io::stdout().lock();
-                stdout.write_all(b"This command will create the directory `rustlings/` which will contain the exercises.\nPress ENTER to continue ")?;
-                stdout.flush()?;
-                press_enter_prompt()?;
-                stdout.write_all(b"\n")?;
-            }
+            let mut stdout = io::stdout().lock();
+            stdout.write_all(b"This command will create the directory `rustlings/` which will contain the exercises.\nPress ENTER to continue ")?;
+            stdout.flush()?;
+            press_enter_prompt()?;
+            stdout.write_all(b"\n")?;
 
             return init::init().context("Initialization failed");
         }
         Some(Subcommands::Dev(dev_command)) => return dev_command.run(),
+        Some(Subcommands::CicvVerify) => {
+            if !Path::new("exercises").is_dir() {
+                println!("{PRE_INIT_MSG}");
+                exit(1);
+            }
+
+            let info_file = InfoFile::parse()?;
+            if info_file.format_version > CURRENT_FORMAT_VERSION {
+                bail!(FORMAT_VERSION_HIGHER_ERR);
+            }
+
+            let exercises = info_file.exercises;
+            let rt = Runtime::new().context("Failed to create Tokio runtime")?;
+            rt.block_on(cicv_verify::cicv_verify(&exercises))?;
+        }
         _ => (),
     }
 
@@ -129,7 +133,6 @@ fn main() -> Result<()> {
         info_file.final_message.unwrap_or_default(),
     )?;
 
-    // Show the welcome message if the state file doesn't exist yet.
     if let Some(welcome_message) = info_file.welcome_message {
         match state_file_status {
             StateFileStatus::NotRead => {
@@ -155,8 +158,6 @@ fn main() -> Result<()> {
             let notify_exercise_names = if args.manual_run {
                 None
             } else {
-                // For the notify event handler thread.
-                // Leaking is not a problem because the slice lives until the end of the program.
                 Some(
                     &*app_state
                         .exercises()
@@ -170,9 +171,6 @@ fn main() -> Result<()> {
             loop {
                 match watch::watch(&mut app_state, notify_exercise_names)? {
                     WatchExit::Shutdown => break,
-                    // It is much easier to exit the watch mode, launch the list mode and then restart
-                    // the watch mode instead of trying to pause the watch threads and correct the
-                    // watch state.
                     WatchExit::List => list::list(&mut app_state)?,
                 }
             }
@@ -194,7 +192,6 @@ fn main() -> Result<()> {
             }
             println!("{}", app_state.current_exercise().hint);
         }
-        // Handled in an earlier match.
         Some(Subcommands::Init | Subcommands::Dev(_)) => (),
     }
 
