@@ -38,7 +38,7 @@ pub async fn cicv_verify(app_state: &mut AppState) -> Result<()> {
             app_state.set_current_exercise_by_name(&exercise.name).unwrap();
             let result = run(&mut app_state).context(format!("Failed to run {}", exercise.name));
             let duration = start.elapsed();
-            (exercise.name, result, duration)
+            (exercise.name.clone(), result, duration)
         });
         handles.push(handle);
     }
@@ -65,7 +65,7 @@ pub async fn cicv_verify(app_state: &mut AppState) -> Result<()> {
         }
         total_time += duration.as_secs();
         exercise_results.push(ExerciseResult {
-            name,
+            name: name.to_string(),
             result: passed,
         });
     }
