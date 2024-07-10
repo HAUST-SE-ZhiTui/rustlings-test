@@ -111,7 +111,7 @@ fn main() -> Result<()> {
             }
 
             let exercises = info_file.exercises;
-            let mut app_state = AppState::new(
+            let (mut app_state, _state_file_status) = AppState::new(
                 exercises,
                 info_file.final_message.unwrap_or_default(),
             )?;
