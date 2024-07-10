@@ -198,6 +198,7 @@ fn main() -> Result<()> {
             println!("{}", app_state.current_exercise().hint);
         }
         Some(Subcommands::Init | Subcommands::Dev(_)) => (),
+        Some(Subcommands::CicvVerify) => (),
     }
 
     Ok(())
