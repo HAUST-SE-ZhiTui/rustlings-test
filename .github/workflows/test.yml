@@ -24,19 +24,19 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        submodules: 'true' # 初始化和更新子模块
+        submodules: recursive # 初始化和更新子模块
     - name: Check for Rustlings and C++ Experiments
       id: check
       run: |
         if [ -d "rustlings" ]; then
-          echo "run_rustlings=true" >> $GITHUB_ENV
+          echo "::set-output name=run_rustlings::true"
         else
-          echo "run_rustlings=false" >> $GITHUB_ENV
+          echo "::set-output name=run_rustlings::false"
         fi
         if [ -d "learning-cxx" ]; then
-          echo "run_cxx=true" >> $GITHUB_ENV
+          echo "::set-output name=run_cxx::true"
         else
-          echo "run_cxx=false" >> $GITHUB_ENV
+          echo "::set-output name=run_cxx::false"
         fi
 
   rustlings:
