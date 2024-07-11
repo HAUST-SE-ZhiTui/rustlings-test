@@ -61,7 +61,7 @@ jobs:
     - name: Copy exercises directory to project root
       run: cp -r rustlings/exercises .
     - name: Run tests for rustlings
-      run: cargo test --verbose
+      run: cargo test --test cicv --verbose
       continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
@@ -125,7 +125,7 @@ jobs:
       continue-on-error: true
     - name: Parse test results and generate JSON for C++
       run: |
-        outfile=".github/result/cxx_result.json"
+        outfile="./../.github/result/cxx_result.json"
         
         # 初始化统计信息
         total_exercises=0
