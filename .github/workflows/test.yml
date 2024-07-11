@@ -61,17 +61,17 @@ jobs:
     - name: Copy exercises directory to project root
       run: cp -r rustlings/exercises .
     - name: Clear JSON file for Rustlings
-      run: echo -n '' > .github/result/check_result.json
+      run: echo -n '' > .github/result/rust_result.json
     - name: Run tests for rustlings
       run: cargo test --verbose
       continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
-        outputFile: .github/result/check_result.json
+        outputFile: .github/result/rust_result.json
     - name: Generate summary JSON for Rustlings
       run: |
-        outfile=".github/result/check_result.json"
+        outfile=".github/result/rust_result.json"
         summary_file=".github/result/rustlings_summary.json"
 
         # 提取需要的值
@@ -121,7 +121,7 @@ jobs:
       with:
         xmake-version: latest
     - name: Clear JSON file for C++
-      run: echo -n '' > .github/result/check_result.json
+      run: echo -n '' > .github/result/cxx_result.json
     - name: Run tests and save output
       run: |
         (xmake && xmake run summary) | tee test_output.txt
@@ -129,7 +129,7 @@ jobs:
       continue-on-error: true
     - name: Parse test results and generate JSON for C++
       run: |
-        outfile=".github/result/check_result.json"
+        outfile=".github/result/cxx_result.json"
         
         # 初始化统计信息
         total_exercises=0
@@ -186,11 +186,11 @@ jobs:
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
-        outputFile: .github/result/check_result.json
-    - name: Generate summary JSON for Rustlings
+        outputFile: .github/result/cxx_result.json
+    - name: Generate summary JSON for CXX
       run: |
-        outfile=".github/result/check_result.json"
-        summary_file=".github/result/rustlings_summary.json"
+        outfile=".github/result/cxx_result.json"
+        summary_file=".github/result/cxx_summary.json"
 
         # 提取需要的值
         total_exercations=$(jq '.statistics.total_exercations' $outfile)
@@ -215,7 +215,7 @@ jobs:
 
     - name: Post summary JSON to remote API
       run: |
-        summary_file=".github/result/rustlings_summary.json"
+        summary_file=".github/result/cxx_summary.json"
 
         # 发送 POST 请求
         curl -X POST "https://api.learningcamp.cn/web/api/courseRank/createByThird" \
