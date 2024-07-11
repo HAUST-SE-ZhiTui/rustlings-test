@@ -44,6 +44,10 @@ jobs:
     needs: initialize
     if: ${{ needs.initialize.outputs.run_rustlings == 'true' }}
     runs-on: ubuntu-latest
+    outputs:
+      details: ${{ steps.autograding.outputs.details }}
+      points: ${{ steps.autograding.outputs.points}}
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -109,6 +113,10 @@ jobs:
     needs: initialize
     if: ${{ needs.initialize.outputs.run_cxx == 'true' }}
     runs-on: ubuntu-latest
+    outputs:
+      details: ${{ steps.autograding.outputs.details }}
+      points: ${{ steps.autograding.outputs.points}}
+      
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
