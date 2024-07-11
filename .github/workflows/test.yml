@@ -60,8 +60,6 @@ jobs:
         rustlings --version
     - name: Copy exercises directory to project root
       run: cp -r rustlings/exercises .
-    - name: Clear JSON file for Rustlings
-      run: echo -n '' > .github/result/rust_result.json
     - name: Run tests for rustlings
       run: cargo test --verbose
       continue-on-error: true
@@ -120,8 +118,6 @@ jobs:
       uses: xmake-io/github-action-setup-xmake@v1
       with:
         xmake-version: latest
-    - name: Clear JSON file for C++
-      run: echo -n '' > .github/result/cxx_result.json
     - name: Run tests and save output
       run: |
         (xmake && xmake run summary) | tee test_output.txt
