@@ -12,7 +12,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
   TZ: Asia/Shanghai # 设置时区
-  RUSTFLAGS: -Awarnings
 
 jobs:
   initialize:
@@ -116,7 +115,7 @@ jobs:
     outputs:
       details: ${{ steps.autograding.outputs.details }}
       points: ${{ steps.autograding.outputs.points}}
-      
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

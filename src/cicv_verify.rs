@@ -84,7 +84,7 @@ pub async fn cicv_verify(app_state: &mut AppState) -> Result<()> {
 
     // 将结果写入文件
     let json_result = serde_json::to_string_pretty(&check_result)?;
-    let result_path = Path::new(".github/result/check_result.json");
+    let result_path = Path::new(".github/result/rust_result.json");
     fs::create_dir_all(result_path.parent().unwrap())?;
     fs::write(result_path, json_result)?;
 
