@@ -1,3 +1,6 @@
 [submodule "rustlings"]
 	path = rustlings
 	url = https://github.com/kunyuanxu-star/rustlings.git
+[submodule "learning-cxx"]
+	path = learning-cxx
+	url = https://github.com/kunyuanxu-star/learning-cxx-test.git
