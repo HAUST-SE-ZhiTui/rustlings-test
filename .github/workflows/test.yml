@@ -33,7 +33,7 @@ jobs:
         else
           echo "run_rustlings=false" >> $GITHUB_ENV
         fi
-        if [ -d "learn-cxx" ]; then
+        if [ -d "learning-cxx" ]; then
           echo "run_cxx=true" >> $GITHUB_ENV
         else
           echo "run_cxx=false" >> $GITHUB_ENV
@@ -42,7 +42,7 @@ jobs:
   rustlings:
     name: Rustlings Autograding
     needs: initialize
-    if: env.run_rustlings == 'true'
+    if: ${{ needs.initialize.outputs.run_rustlings == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -109,7 +109,7 @@ jobs:
   cxx:
     name: C++ Autograding
     needs: initialize
-    if: env.run_cxx == 'true'
+    if: ${{ needs.initialize.outputs.run_cxx == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -125,7 +125,7 @@ jobs:
     - name: Run tests and save output
       run: |
         (xmake && xmake run summary) | tee test_output.txt
-      working-directory: learn-cxx
+      working-directory: learning-cxx
       continue-on-error: true
     - name: Parse test results and generate JSON for C++
       run: |
@@ -181,7 +181,7 @@ jobs:
             "total_time": '$total_time'
           }
         }' >> $outfile
-      working-directory: learn-cxx
+      working-directory: learning-cxx
       continue-on-error: true
     - uses: yfblock/os-autograding@master
       id: autograding
