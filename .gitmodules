@@ -4,3 +4,6 @@
 [submodule "learning-cxx"]
 	path = learning-cxx
 	url = https://github.com/kunyuanxu-star/learning-cxx-test.git
+[submodule "test"]
+	path = test
+	url = https://github.com/kunyuanxu-star/class-test-github.git
