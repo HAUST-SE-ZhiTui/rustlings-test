@@ -155,11 +155,11 @@ jobs:
           for (( i=0; i<${#status_string}; i++ )); do
             exercise_name=$(printf "exercise%02d" $i)
             if [[ ${status_string:$i:1} == "#" ]]; then
-            result="true"
-          else
-            result="false"
-          fi
-          json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
+              result="true"
+            else
+              result="false"
+            fi
+            json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
           done
 
           # 更新统计信息
