@@ -132,49 +132,47 @@ jobs:
       continue-on-error: true
     - name: Parse test results and generate JSON for C++
       run: |
+        outfile="test_output.txt"
         summary_file="./../.github/result/cxx_result.json"
 
-        # 捕获 `xmake run summary` 指令的输出并保存到变量
-        console_output=$(xmake run summary)
+            # 获取最后一行信息并进行处理
+            info_line=$(tail -n 1 $outfile | sed -E 's/\\x1b\[[0-9;]*m//g')
 
-        # 获取最后一行信息
-        info_line=$(echo "$console_output" | tail -n 1)
+            # 提取通过题数和总题目数量
+            total_succeeds=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f1)
+            total_exercises=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f2)
 
-        # 提取通过题数和总题目数量
-        total_succeeds=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f1)
-        total_exercises=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f2)
+            # 提取题目状态字符串
+            status_string=$(echo $info_line | cut -d' ' -f2 | tr -d '[]')
 
-        # 提取题目状态字符串
-        status_string=$(echo $info_line | cut -d' ' -f2 | tr -d '[]')
+            # 初始化总失败数
+            total_failures=$((total_exercises - total_succeeds))
 
-        # 初始化总失败数
-        total_failures=$((total_exercises - total_succeeds))
+            # 遍历状态字符串并更新 JSON 中的 result 字段
+            for (( i=0; i<${#status_string}; i++ )); do
+              exercise_name=$(printf "exercise%02d" $i)
+              current_char=${status_string:$i:1}
+              if [[ $current_char == "#" ]]; then
+                result="true"
+              else
+                result="false"
+              fi
 
-        # 遍历状态字符串并更新 JSON 中的 result 字段
-        for (( i=0; i<${#status_string}; i++ )); do
-          exercise_name=$(printf "exercise%02d" $i)
-          current_char=${status_string:$i:1}
-          if [[ $current_char == "#" ]]; then
-            result="true"
-          else
-            result="false"
-          fi
+              # 输出当前位置和状态字符串的字符
+              echo "Position: $i, Character: $current_char"
 
-          # 输出当前位置和状态字符串的字符
-          echo "Position: $i, Character: $current_char"
+              # 打印出要写入的内容
+              echo "Writing to JSON: {\"name\": \"$exercise_name\", \"result\": $result}"
 
-          # 打印出要写入的内容
-          echo "Writing to JSON: {\"name\": \"$exercise_name\", \"result\": $result}"
+              # 直接修改 JSON 文件中的相应字段
+              jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)' $summary_file > tmp.json && mv tmp.json $summary_file
+            done
 
-          # 直接修改 JSON 文件中的相应字段
-          jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)' $summary_file > tmp.json && mv tmp.json $summary_file
-        done
+            # 更新统计信息
+            jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures' $summary_file > tmp.json && mv tmp.json $summary_file
 
-        # 更新统计信息
-        jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures' $summary_file > tmp.json && mv tmp.json $summary_file
-
-        # 打印新的 JSON 文件到终端
-        cat $summary_file
+            # 打印新的 JSON 文件到终端
+            cat $summary_file
       working-directory: learning-cxx
       continue-on-error: true
     - uses: yfblock/os-autograding@master
