@@ -150,15 +150,23 @@ jobs:
 
             # 遍历状态字符串并更新 JSON 中的 result 字段
             for (( i=0; i<${#status_string}; i++ )); do
-              exercise_name=$(printf "exercise%d" $i)
-              if [[ ${status_string:$i:1} == "#" ]]; then
-                result="true"
-              else
-                continue
-              fi
-              # 直接修改 JSON 文件中的相应字段
-              jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)' $summary_file > tmp.json && mv tmp.json $summary_file
-            done
+                exercise_name=$(printf "exercise%02d" $i)
+                current_char=${status_string:$i:1}
+                if [[ $current_char == "#" ]]; then
+                  result="true"
+                else
+                  result="false"
+                fi
+
+                # 输出当前位置和状态字符串的字符
+                echo "Position: $i, Character: $current_char"
+
+                # 打印出要写入的内容
+                echo "Writing to JSON: {\"name\": \"$exercise_name\", \"result\": $result}"
+
+                # 直接修改 JSON 文件中的相应字段
+                jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)' $summary_file > tmp.json && mv tmp.json $summary_file
+              done
 
             # 更新统计信息
             jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures' $summary_file > tmp.json && mv tmp.json $summary_file
