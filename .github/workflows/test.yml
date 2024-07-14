@@ -135,39 +135,41 @@ jobs:
         outfile="test_output.txt"
         summary_file="./../.github/result/cxx_result.json"
 
-        # 读取原始 JSON 文件
-        json=$(cat $summary_file)
+          # 读取原始 JSON 文件
+          json=$(cat $summary_file)
 
-        # 初始化统计信息
-        total_succeeds=0
-        total_failures=0
+          # 获取最后一行信息
+          info_line=$(tail -n 1 $outfile)
 
-        # 解析测试输出并更新 JSON
-        while IFS= read -r line; do
-          if [[ "$line" == *passed* ]]; then
-            exercise_name=$(echo "$line" | cut -d' ' -f1)
+          # 提取通过题数和总题目数量
+          total_succeeds=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f1)
+          total_exercises=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f2)
+
+          # 提取题目状态字符串
+          status_string=$(echo $info_line | cut -d' ' -f2 | tr -d '[]')
+
+          # 初始化总失败数
+          total_failures=$((total_exercises - total_succeeds))
+
+          # 遍历状态字符串并更新 JSON 中的 result 字段
+          for (( i=0; i<${#status_string}; i++ )); do
+            exercise_name=$(printf "exercise%02d" $i)
+            if [[ ${status_string:$i:1} == "#" ]]; then
             result="true"
-            total_succeeds=$((total_succeeds + 1))
-          elif [[ "$line" == *failed* ]]; then
-            exercise_name=$(echo "$line" | cut -d' ' -f1)
-            result="false"
-            total_failures=$((total_failures + 1))
           else
-            continue
+            result="false"
           fi
-
-          # 更新 JSON 中的 result 字段
           json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
-        done < "$outfile"
+          done
 
-        # 更新统计信息
-        json=$(echo "$json" | jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures')
+          # 更新统计信息
+          json=$(echo "$json" | jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures')
 
-        # 保存更新后的 JSON 文件
-        echo "$json" > $summary_file
+          # 保存更新后的 JSON 文件
+          echo "$json" > $summary_file
 
-        # 打印新的 JSON 文件到终端
-        cat $summary_file
+          # 打印新的 JSON 文件到终端
+          cat $summary_file
       working-directory: learning-cxx
       continue-on-error: true
     - uses: yfblock/os-autograding@master
