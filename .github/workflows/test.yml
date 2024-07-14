@@ -154,7 +154,7 @@ jobs:
               if [[ ${status_string:$i:1} == "#" ]]; then
                 result="true"
               else
-                result="false"
+                continue
               fi
               # 直接修改 JSON 文件中的相应字段
               jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)' $summary_file > tmp.json && mv tmp.json $summary_file
