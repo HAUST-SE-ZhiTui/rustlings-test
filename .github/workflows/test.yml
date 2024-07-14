@@ -153,14 +153,13 @@ jobs:
 
         # 遍历状态字符串并更新 JSON 中的 result 字段
         for (( i=0; i<${#status_string}; i++ )); do
-          exercise_name=$(printf "exercise%02d" $i)
           if [[ ${status_string:$i:1} == "#" ]]; then
             result="true"
           else
             result="false"
           fi
-          json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
-          
+          json=$(echo "$json" | jq --argjson index $i --arg result "$result" '.exercises[$index].result = ($result | test("true"))')
+
           # 保存更新后的 JSON 文件
           echo "$json" > $summary_file
         done
