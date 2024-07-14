@@ -155,7 +155,7 @@ jobs:
             # 更新 JSON 中的 result 字段
             json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
           fi
-        done < learn-cxx/test_output.txt
+        done < test_output.txt
 
         # 更新统计信息
         json=$(echo "$json" | jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures')
