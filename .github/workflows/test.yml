@@ -127,12 +127,12 @@ jobs:
         xmake-version: latest
     - name: Run tests and save output
       run: |
-        (xmake && xmake run summary) | tee test_output.txt
+        (xmake && xmake run summary) | tee test_output.json
       working-directory: learning-cxx
       continue-on-error: true
     - name: Parse test results and generate JSON for C++
       run: |
-        outfile="test_output.txt"
+        outfile="test_output.json"
         summary_file="./../.github/result/cxx_result.json"
 
         # 读取原始 JSON 文件
@@ -155,7 +155,7 @@ jobs:
             # 更新 JSON 中的 result 字段
             json=$(echo "$json" | jq --arg name "$exercise_name" --arg result "$result" '.exercises |= map(if .name == $name then .result = ($result | test("true")) else . end)')
           fi
-        done < test_output.txt
+        done < test_output.json
 
         # 更新统计信息
         json=$(echo "$json" | jq --argjson succeeds "$total_succeeds" --argjson failures "$total_failures" '.statistics.total_succeeds = $succeeds | .statistics.total_failures = $failures')
