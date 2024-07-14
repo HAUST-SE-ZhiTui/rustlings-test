@@ -38,9 +38,7 @@ jobs:
         else
           echo "::set-output name=run_cxx::false"
         fi
-        # Check for other submodules
-        other_submodules=$(find . -maxdepth 1 -type d ! -name 'rustlings' ! -name 'learning-cxx' ! -name '.' ! -name '.git' | wc -l)
-        if [ "$other_submodules" -gt 0 ]; then
+        if [ -d "test" ]; then
           echo "::set-output name=run_test::true"
         else
           echo "::set-output name=run_test::false"
@@ -221,23 +219,27 @@ jobs:
     name: Test Job for Other Submodules
     needs: initialize
     if: ${{ needs.initialize.outputs.run_test == 'true' }}
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
     - name: Post summary JSON to remote API
       run: |
-  
-          curl -X POST "https://api.learningcamp.cn/web/api/courseRank/createByThird" \
-              -H "accept: application/json;charset=utf-8" \
-              -H "Content-Type: application/json" \
-              -d '{
-                    "channel": "github",
-                    "courseId": 1698,
-                    "ext": "aaa",
-                    "name": "${{ github.actor }}",
-                    "score": 2,
-                    "totalScore": 23
-                  }' \
-              -v
+         curl -X POST "https://api.learningcamp.cn/web/api/courseRank/createByThird" \
+          -H "accept: application/json;charset=utf-8" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "channel": "github",
+                "courseId": 1698,
+                "ext": "aaa",
+                "name": "${{ github.actor }}",
+                "score": 2,
+                "totalScore": 23
+              }' \
+          -v
+
             
   
