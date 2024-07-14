@@ -236,7 +236,7 @@ jobs:
                 "courseId": 1698,
                 "ext": "aaa",
                 "name": "${{ github.actor }}",
-                "score": 2,
+                "score": 1,
                 "totalScore": 23
               }' \
           -v
