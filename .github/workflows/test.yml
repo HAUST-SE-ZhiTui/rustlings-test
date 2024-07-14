@@ -136,7 +136,7 @@ jobs:
         summary_file="./../.github/result/cxx_result.json"
 
             # 获取最后一行信息并进行处理
-            info_line=$(tail -n 1 $outfile | sed -E 's/\\x1b\[[0-9;]*m//g')
+            info_line=$(tail -n 1 $outfile | sed 's/\x1b\[[0-9;]*m//g')
 
             # 提取通过题数和总题目数量
             total_succeeds=$(echo $info_line | cut -d' ' -f1 | cut -d'/' -f1)
