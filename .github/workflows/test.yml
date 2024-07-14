@@ -150,7 +150,7 @@ jobs:
 
             # 遍历状态字符串并更新 JSON 中的 result 字段
             for (( i=0; i<${#status_string}; i++ )); do
-              exercise_name=$(printf "exercise%02d" $i)
+              exercise_name=$(printf "exercise%d" $i)
               if [[ ${status_string:$i:1} == "#" ]]; then
                 result="true"
               else
