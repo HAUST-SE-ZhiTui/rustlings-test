@@ -127,59 +127,51 @@ jobs:
         xmake-version: latest
     - name: Run tests and save output
       run: |
-        (xmake && xmake run summary) | tee test_output.txt
-      working-directory: learning-cxx
-      continue-on-error: true
-    - name: Parse test results and generate JSON for C++
-      run: |
-        outfile="./../.github/result/cxx_result.json"
-        
-        # 初始化统计信息
-        total_exercises=0
-        total_succeeds=0
-        total_failures=0
-        
-        # 初始化JSON 开始部分
-        echo '{
-          "exercises": [' > $outfile
+        result_output="$(xmake run summary)"
+          echo "Test results output:"
+          echo "$result_output"
 
-        # 解析测试输出
-        while IFS= read -r line; do
-          if [[ "$line" == *"passed"* ]]; then
-            exercise_name=$(echo $line | cut -d' ' -f1)
-            result="true"
-            total_succeeds=$((total_succeeds + 1))
-            total_exercises=$((total_exercises + 1))
-          elif [[ "$line" == *"failed"* ]]; then
-            exercise_name=$(echo $line | cut -d' ' -f1)
-            result="false"
-            total_failures=$((total_failures + 1))
-            total_exercises=$((total_exercises + 1))
-          else
-            continue
-          fi
-          
-          # 添加练习结果到JSON文件
-          echo '    {
-              "name": "'$exercise_name'",
-              "result": '$result'
-            },' >> $outfile
-        done < test_output.txt
+          # Initialize JSON data
+          json_data='['
 
-        # 去掉最后一个逗号
-        sed -i '$ s/,$//' $outfile
+          # Initialize variables
+          total_exercises=0
+          total_succeeds=0
+          total_failures=0
 
-        # 添加JSON 结束部分
-        echo '  ],
-          "user_name": null,
-          "statistics": {
-            "total_exercations": '$total_exercises',
-            "total_succeeds": '$total_succeeds',
-            "total_failures": '$total_failures',
-            "total_time": 0
-          }
-        }' >> $outfile
-        cat $outfile
+          # Process each line of output
+          IFS=$'\n'
+          for line in $result_output; do
+            if [[ "$line" == *"testing"* ]]; then
+              current_test=$(echo "$line" | grep -oP 'exercise[0-9]+')
+            elif [[ "$line" == *"passed"* ]]; then
+              json_data+='{ "name": "'"$current_test"'", "result": true },'
+              total_succeeds=$((total_succeeds + 1))
+              total_exercises=$((total_exercises + 1))
+            elif [[ "$line" == *"failed"* ]]; then
+              json_data+='{ "name": "'"$current_test"'", "result": false },'
+              total_failures=$((total_failures + 1))
+              total_exercises=$((total_exercises + 1))
+            fi
+          done
+
+          # Remove the last comma
+          json_data="${json_data%,}"
+
+          json_data+='],
+            "user_name": null,
+            "statistics": {
+              "total_exercations": '$total_exercises',
+              "total_succeeds": '$total_succeeds',
+              "total_failures": '$total_failures',
+              "total_time": 3
+            }
+          }'
+
+          # Write JSON file
+          echo "$json_data" > ./../.github/result/cxx_result.json
+
+          cat ./../.github/result/cxx_result.json
       working-directory: learning-cxx
       continue-on-error: true
     - uses: yfblock/os-autograding@master
@@ -201,7 +193,7 @@ jobs:
           --arg channel "github" \
           --argjson courseId 1698 \
           --arg ext "aaa" \
-          --arg name "${{ github.actor }}" \
+          --arg name "$cxx_user" \
           --argjson score "$total_succeeds" \
           --argjson totalScore "$total_exercations" \
           '{channel: $channel, courseId: $courseId, ext: $ext, name: $name, score: $score, totalScore: $totalScore}')
