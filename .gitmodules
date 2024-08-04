@@ -7,3 +7,6 @@
 [submodule "test"]
 	path = test
 	url = https://github.com/kunyuanxu-star/class-test-github.git
+[submodule "project2"]
+	path = project2
+	url = https://github.com/kunyuanxu-star/learning-lm-rs-test.git
