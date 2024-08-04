@@ -407,36 +407,33 @@ jobs:
 
     - name: Parse test results and generate JSON for Project 1
       run: |
-           test_output="project1/test_output.txt"
+            test_output="project1/test_output.txt"
             json_file=".github/result/project1_result.json"
-            
+
             # 初始化计数器
             total_exercations=0
             total_succeeds=0
             total_failures=0
-            exercises_json="["
-            
-            # 解析输出，假设成功的输出包含"PASSED"且失败的输出包含"FAILED"
+            exercises_json="[]"
+
+            # 解析输出
             while IFS= read -r line; do
               if [[ $line =~ (.+)\ \.\.\.\ (PASSED|FAILED) ]]; then
                 test_name="${BASH_REMATCH[1]}"
                 test_result="${BASH_REMATCH[2]}"
-            
+
                 # 计数
                 total_exercations=$((total_exercations + 1))
                 if [[ $test_result == "FAILED" ]]; then
-                  exercises_json+="$(jq -n --arg name "$test_name" --argjson result false '{name: $name, result: $result}'),"
+                  exercises_json=$(echo "$exercises_json" | jq --arg name "$test_name" --argjson result false '. + [{name: $name, result: $result}]')
                   total_failures=$((total_failures + 1))
                 else
-                  exercises_json+="$(jq -n --arg name "$test_name" --argjson result true '{name: $name, result: $result}'),"
+                  exercises_json=$(echo "$exercises_json" | jq --arg name "$test_name" --argjson result true '. + [{name: $name, result: $result}]')
                   total_succeeds=$((total_succeeds + 1))
                 fi
               fi
             done < "$test_output"
-            
-            # 去掉最后一个逗号并闭合 JSON 数组
-            exercises_json="${exercises_json%,}]"
-            
+
             # 生成最终 JSON
             final_json=$(jq -n \
               --argjson exercises "$exercises_json" \
@@ -446,7 +443,7 @@ jobs:
               --argjson total_failures "$total_failures" \
               --argjson total_time 3 \
               '{exercises: $exercises, user_name: $user_name, statistics: {total_exercations: $total_exercations, total_succeeds: $total_succeeds, total_failures: $total_failures, total_time: $total_time}}')
-            
+
             # 保存到 JSON 文件
             echo "$final_json" > "$json_file"
     - name: Generate summary JSON for Project 1
