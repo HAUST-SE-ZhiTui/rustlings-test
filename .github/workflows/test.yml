@@ -400,13 +400,6 @@ jobs:
       run: |
         cd project1
         make test-cpp | tee test_output.txt
-    - name: Clean test output
-      run: |
-        test_output="project1/test_output.txt"
-        cleaned_output="project1/cleaned_test_output.txt"
-        # Remove ANSI color codes and save to a new file
-        sed 's/\x1b\[[0-9;]*m//g' "$test_output" > "$cleaned_output"
-        cat "$cleaned_output"
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
@@ -414,7 +407,7 @@ jobs:
 
     - name: Parse test results and generate JSON for Project 1
       run: |
-        test_output="project1/cleaned_test_output.txt"
+          test_output="project1/test_output.txt"
           json_file=".github/result/project1_result.json"
 
           # Initialize statistics
@@ -422,7 +415,7 @@ jobs:
           total_exercations=0
           total_succeeds=0
 
-          # Read the cleaned output and extract test results
+          # Read the output and extract test results
           while IFS= read -r line; do
             if [[ $line =~ (.+)\ \.\.\.\ (PASSED|FAILED) ]]; then
               test_name="${BASH_REMATCH[1]}"
