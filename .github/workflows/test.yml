@@ -288,34 +288,48 @@ jobs:
         outputFile: .github/result/project2_result.json
     - name: Parse test results and generate JSON for Project 2
       run: |
-        outfile=".github/result/project2_result.json"
-        summary_file=".github/result/project2_summary.json"
-        test_output="test_output.txt"
+        test_output="project2/test_output.txt"
+        json_file=".github/result/project2_result.json"
 
-        # 读取测试结果，计算通过和失败的测试用例数量
-        total_tests=$(grep -o 'running \([0-9]*\)' $test_output | awk '{print \$2}')
-        total_succeeds=$(grep -o 'FAILED' $test_output | wc -l)
-        total_succeeds=$((total_tests - total_succeeds))
+        # 初始化计数器
+        total_exercations=0
+        total_succeeds=0
+        total_failures=0
+        exercises_json="["
 
-        # 失败的测试数量
-        total_failures=$((total_tests - total_succeeds))
+        # 从测试输出中提取测试结果
+        while IFS= read -r line; do
+          if [[ $line =~ test\ (.+)\ \.\.\.\ (FAILED|ok) ]]; then
+            test_name="${BASH_REMATCH[1]}"
+            test_result="${BASH_REMATCH[2]}"
 
-        # 生成 JSON
-        new_json=$(jq -n \
-          --arg channel "github" \
-          --argjson courseId 1701 \
-          --arg ext "aaa" \
-          --arg name "${{ github.actor }}" \
-          --argjson score "$total_succeeds" \
-          --argjson totalScore "$total_tests" \
-          --argjson totalFailures "$total_failures" \
-          '{channel: $channel, courseId: $courseId, ext: $ext, name: $name, score: $score, totalScore: $totalScore, totalFailures: $totalFailures}')
+            # 计数
+            total_exercations=$((total_exercations + 1))
+            if [[ $test_result == "FAILED" ]]; then
+              exercises_json+="$(jq -n --arg name "$test_name" --argjson result false '{name: $name, result: $result}'),"
+              total_failures=$((total_failures + 1))
+            else
+              exercises_json+="$(jq -n --arg name "$test_name" --argjson result true '{name: $name, result: $result}'),"
+              total_succeeds=$((total_succeeds + 1))
+            fi
+          fi
+        done < "$test_output"
 
-        # 保存新的 JSON 文件
-        echo "$new_json" > $summary_file
+        # 去掉最后一个逗号并闭合 JSON 数组
+        exercises_json="${exercises_json%,}]"
 
-        # 打印新的 JSON 文件到终端
-        cat $summary_file
+        # 生成最终 JSON
+        final_json=$(jq -n \
+          --argjson exercises "$exercises_json" \
+          --arg user_name "null" \
+          --argjson total_exercations "$total_exercations" \
+          --argjson total_succeeds "$total_succeeds" \
+          --argjson total_failures "$total_failures" \
+          --argjson total_time 3 \
+          '{exercises: $exercises, user_name: $user_name, statistics: {total_exercations: $total_exercations, total_succeeds: $total_succeeds, total_failures: $total_failures, total_time: $total_time}}')
+
+        # 保存到 JSON 文件
+        echo "$final_json" > "$json_file"
 
     - name: Post summary JSON for Project 2
       run: |
