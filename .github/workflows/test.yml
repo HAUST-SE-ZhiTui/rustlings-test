@@ -262,7 +262,11 @@ jobs:
     needs: initialize
     if: ${{ needs.initialize.outputs.run_project2 == 'true' }}
     runs-on: ubuntu-latest
-
+    outputs:
+      details: ${{ steps.autograding.outputs.details }}
+      points: ${{ steps.autograding.outputs.points}}
+    env:
+      API_URL: ${{ needs.initialize.outputs.api_url }}
     steps:
     - uses: actions/checkout@v3
       with:
