@@ -43,6 +43,11 @@ jobs:
         else
           echo "::set-output name=run_test::false"
         fi
+        if [ -d "project2" ]; then
+          echo "::set-output name=run_project2::true"
+        else
+          echo "::set-output name=run_project2::false"
+        fi
 
   rustlings:
     name: Rustlings Autograding
@@ -240,6 +245,78 @@ jobs:
                 "totalScore": 23
               }' \
           -v
+  project2:
+    name: Project 2 Autograding
+    needs: initialize
+    if: ${{ needs.initialize.outputs.run_project2 == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - name: Set up Rust environment for Project 2
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+    - name: Build Project 2
+      run: |
+        cd project2
+        cargo build --verbose
+    - name: Run tests for Project 2
+      id: run_tests
+      run: |
+        cd project2
+        cargo test --verbose | tee test_output.txt
+    - uses: yfblock/os-autograding@master
+      id: autograding
+      with:
+        outputFile: .github/result/project2_result.json
+    - name: Parse test results and generate JSON for Project 2
+      run: |
+        outfile=".github/result/project2_result.json"
+        summary_file=".github/result/project2_summary.json"
+        test_output="test_output.txt"
+
+        # 读取测试结果，计算通过和失败的测试用例数量
+        total_tests=$(grep -o 'running \([0-9]*\)' $test_output | awk '{print \$2}')
+        total_succeeds=$(grep -o 'FAILED' $test_output | wc -l)
+        total_succeeds=$((total_tests - total_succeeds))
+
+        # 失败的测试数量
+        total_failures=$((total_tests - total_succeeds))
+
+        # 生成 JSON
+        new_json=$(jq -n \
+          --arg channel "github" \
+          --argjson courseId 1701 \
+          --arg ext "aaa" \
+          --arg name "${{ github.actor }}" \
+          --argjson score "$total_succeeds" \
+          --argjson totalScore "$total_tests" \
+          --argjson totalFailures "$total_failures" \
+          '{channel: $channel, courseId: $courseId, ext: $ext, name: $name, score: $score, totalScore: $totalScore, totalFailures: $totalFailures}')
+
+        # 保存新的 JSON 文件
+        echo "$new_json" > $summary_file
+
+        # 打印新的 JSON 文件到终端
+        cat $summary_file
+
+    - name: Post summary JSON for Project 2
+      run: |
+        summary_file=".github/result/project2_summary.json"
+
+        # 发送 POST 请求
+        curl -X POST "$API_URL" \
+          -H "accept: application/json;charset=utf-8" \
+          -H "Content-Type: application/json" \
+          -d "$(cat $summary_file)" \
+          -v
+        
+        
 
             
   
