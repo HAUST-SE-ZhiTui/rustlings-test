@@ -1,0 +1,55 @@
+{
+    "exercises": [
+      {
+        "name": "test_allocator",
+        "result": false
+      },
+      {
+        "name": "test_cast",
+        "result": false
+      },
+      {
+        "name": "test_clip",
+        "result": false
+      },
+      {
+        "name": "test_concat",
+        "result": false
+      },
+      {
+        "name": "test_element_wise",
+        "result": false
+      },
+      {
+        "name": "test_transpose",
+        "result": false
+      },
+      {
+        "name": "test_nativecpu_concat",
+        "result": false
+      },
+      {
+        "name": "test_nativecpu_elementwise",
+        "result": false
+      },
+      {
+        "name": "test_nativecpu_transpose",
+        "result": false
+      },
+      {
+        "name": "test_matmul",
+        "result": false
+      },
+      {
+        "name": "test_graph",
+        "result": false
+      }
+    ],
+    "user_name": null,
+    "statistics": {
+      "total_exercations": 11,
+      "total_succeeds": 0,
+      "total_failures": 11,
+      "total_time": 3
+    }
+  }
