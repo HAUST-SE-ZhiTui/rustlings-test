@@ -7,7 +7,6 @@ exclude = [
   "dev",
 ]
 members = [
-    "project1",
     "project2",
     # 其他项目
 ]
