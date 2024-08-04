@@ -10,3 +10,6 @@
 [submodule "project2"]
 	path = project2
 	url = https://github.com/kunyuanxu-star/learning-lm-rs-test.git
+[submodule "project1"]
+	path = project1
+	url = https://github.com/kunyuanxu-star/TinyInfiniTensor-test.git
