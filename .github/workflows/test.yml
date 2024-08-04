@@ -400,6 +400,12 @@ jobs:
       run: |
         cd project1
         make test-cpp | tee test_output.txt
+    - name: Clean test output
+      run: |
+        test_output="project1/test_output.txt"
+        cleaned_output="project1/cleaned_test_output.txt"
+        # Remove ANSI color codes and save to a new file
+        sed 's/\x1b\[[0-9;]*m//g' "$test_output" > "$cleaned_output"
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
@@ -407,49 +413,49 @@ jobs:
 
     - name: Parse test results and generate JSON for Project 1
       run: |
-        test_output="project1/test_output.txt"
-        json_file=".github/result/project1_result.json"
+        test_output="project1/cleaned_test_output.txt"
+          json_file=".github/result/project1_result.json"
 
-        # Initialize statistics
-        exercises_json="[]"
-        total_exercations=0
-        total_succeeds=0
+          # Initialize statistics
+          exercises_json="[]"
+          total_exercations=0
+          total_succeeds=0
 
-        # Read the output and extract test results
-        while IFS= read -r line; do
-          if [[ $line =~ (.+)\ \.\.\.\ (PASSED|FAILED) ]]; then
-            test_name="${BASH_REMATCH[1]}"
-            test_result="${BASH_REMATCH[2]}"
+          # Read the cleaned output and extract test results
+          while IFS= read -r line; do
+            if [[ $line =~ (.+)\ \.\.\.\ (PASSED|FAILED) ]]; then
+              test_name="${BASH_REMATCH[1]}"
+              test_result="${BASH_REMATCH[2]}"
 
-            # Increment total exercises
-            total_exercations=$((total_exercations + 1))
+              # Increment total exercises
+              total_exercations=$((total_exercations + 1))
 
-            # Check if the test passed or failed
-            if [[ $test_result == "FAILED" ]]; then
-              exercises_json+="$(jq -n --arg name "$test_name" --argjson result false '{name: $name, result: $result}'),"
-            else
-              exercises_json+="$(jq -n --arg name "$test_name" --argjson result true '{name: $name, result: $result}'),"
-              total_succeeds=$((total_succeeds + 1))
+              # Check if the test passed or failed
+              if [[ $test_result == "FAILED" ]]; then
+                exercises_json+="$(jq -n --arg name "$test_name" --argjson result false '{name: $name, result: $result}'),"
+              else
+                exercises_json+="$(jq -n --arg name "$test_name" --argjson result true '{name: $name, result: $result}'),"
+                total_succeeds=$((total_succeeds + 1))
+              fi
             fi
-          fi
-        done < "$test_output"
+          done < "$test_output"
 
-        # Remove the trailing comma and close the JSON array
-        exercises_json="${exercises_json%,}]"
+          # Remove the trailing comma and close the JSON array
+          exercises_json="${exercises_json%,}]"
 
-        # Create the final JSON structure
-        final_json=$(jq -n \
-          --argjson exercises "$exercises_json" \
-          --arg user_name "null" \
-          --argjson total_exercations "$total_exercations" \
-          --argjson total_succeeds "$total_succeeds" \
-          --argjson total_failures "$((total_exercations - total_succeeds))" \
-          --argjson total_time 3 \
-          '{exercises: $exercises, user_name: $user_name, statistics: {total_exercations: $total_exercations, total_succeeds: $total_succeeds, total_failures: $total_failures, total_time: $total_time}}')
+          # Create the final JSON structure
+          final_json=$(jq -n \
+            --argjson exercises "$exercises_json" \
+            --arg user_name "null" \
+            --argjson total_exercations "$total_exercations" \
+            --argjson total_succeeds "$total_succeeds" \
+            --argjson total_failures "$((total_exercations - total_succeeds))" \
+            --argjson total_time 3 \
+            '{exercises: $exercises, user_name: $user_name, statistics: {total_exercations: $total_exercations, total_succeeds: $total_succeeds, total_failures: $total_failures, total_time: $total_time}}')
 
-        # Write the final JSON to the file
-        echo "$final_json" > "$json_file"
-        cat "$json_file"
+          # Write the final JSON to the file
+          echo "$final_json" > "$json_file"
+          cat "$json_file"
     - name: Generate summary JSON for Project 1
       run: |
         outfile=".github/result/project1_result.json"
