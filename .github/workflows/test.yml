@@ -387,11 +387,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-        submodules: 'true'
-    - name: Initialize and update project1 submodules
-      run: |
-        cd project1
-        git submodule update --init --recursive
+        submodules: recursive
     - name: Build Project 1
       run: |
         cd project1
