@@ -406,6 +406,7 @@ jobs:
         cleaned_output="project1/cleaned_test_output.txt"
         # Remove ANSI color codes and save to a new file
         sed 's/\x1b\[[0-9;]*m//g' "$test_output" > "$cleaned_output"
+        cat "$cleaned_output"
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
